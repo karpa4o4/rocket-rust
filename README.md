@@ -10,15 +10,15 @@
 #### Initialize the client with a username and password.
 
 ```rust,no_run
-    use rocket_rust::{RocketChatAPI, Settings};
+use rocket_rust::{RocketChatAPI, Settings};
 
-    let client = RocketChatAPI::new(
-        Settings {
-            username: String::from("chuck_norris"),
-            password: String::from("supersecret"),
-            domain: String::from("https://mydomain.com"),
-        },
-    );
+let client = RocketChatAPI::new(
+    Settings {
+        username: String::from("chuck_norris"),
+        password: String::from("supersecret"),
+        domain: String::from("https://mydomain.com"),
+    },
+);
 ```
 
 #### Available API methods
@@ -26,7 +26,7 @@
 ##### [Post Message](https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/chat-endpoints/postmessage)
 
 ```rust,no_run
-    let result = client.send_message("Some message with star emoji :star:", "#channel");
+let result = client.send_message("Some message with star emoji :star:", "#channel");
 ```
 
 
