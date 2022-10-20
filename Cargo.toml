@@ -1,10 +1,10 @@
 [package]
-name = "rocket-rust"
+name = "rocketchat"
 version = "0.2.0"
 edition = "2021"
 authors = ["Gavrilyuk Denis"]
-description = "RocketChat API Implemented in Rust"
-repository = "https://github.com/karpa4o4/rocket-rust"
+description = "Rocket.Chat API Implemented in Rust"
+repository = "https://github.com/karpa4o4/rocketchat"
 readme = "README.md"
 license = "MIT/Apache-2.0"
 

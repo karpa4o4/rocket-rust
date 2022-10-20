@@ -1,8 +1,8 @@
-# rocket-rust 
+# rocketchat
 
 ### Rust API wrapper for the [RocketChat API](https://docs.rocket.chat/development-docs)
 
-[![crates.io](https://img.shields.io/crates/v/rocket-rust.svg)](https://crates.io/crates/rocket-rust)
+[![crates.io](https://img.shields.io/crates/v/rocketchat.svg)](https://crates.io/crates/rocketchat)
 [![MIT/Apache-2 licensed](https://img.shields.io/crates/l/reqwest.svg)](./LICENSE-APACHE)
 
 ## Example
@@ -10,7 +10,7 @@
 #### Initialize the client with a username and password.
 
 ```rust,no_run
-use rocket_rust::{RocketChatAPI, Settings};
+use rocketchat::{RocketChatAPI, Settings};
 
 let client = RocketChatAPI::new(
     Settings {
