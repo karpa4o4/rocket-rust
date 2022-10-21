@@ -26,8 +26,15 @@ pub trait APIMethod {
     fn method(&self) -> Method;
     fn json_payload(&self) -> HashMap<&str, &str>;
 
+    fn domain(&self) -> &String {
+        match self.settings() {
+            Settings::Auth(settings) => &settings.domain,
+            Settings::Login(settings) => &settings.domain,
+        }
+    }
+
     fn build_endpoint(&self, uri: &str) -> String {
-        format!("{}{}", self.settings().domain, uri)
+        format!("{}{}", self.domain(), uri)
     }
 
     fn request(
@@ -66,19 +73,19 @@ pub trait APIMethod {
         }
     }
 
-    fn login_payload(&self) -> HashMap<&str, &str> {
+    fn login_payload<'a>(&'a self, username: &'a String, password: &'a String) -> HashMap<&str, &str> {
         let mut payload = HashMap::new();
-        payload.insert("user", self.settings().username.as_str());
-        payload.insert("password", self.settings().password.as_str());
+        payload.insert("user", username.as_str());
+        payload.insert("password", password.as_str());
 
         payload
     }
 
-    fn login(&self) -> Result<AuthData, Error> {
+    fn login(&self, username: &String, password: &String) -> Result<AuthData, Error> {
         let response = self.request(
             self.build_endpoint("/api/v1/login"),
             Method::POST,
-            &self.login_payload(),
+            &self.login_payload(username, password),
             None
         )?;
 
@@ -98,8 +105,16 @@ pub trait APIMethod {
     }
 
     fn call(&self) -> Result<String, Error>{
-        // TODO: add processing and return LoginError
-        let auth_data= self.login()?;
+        let auth_data= match self.settings() {
+            Settings::Login(settings) => {
+                // TODO: add processing and return LoginError
+                self.login(&settings.username, &settings.password)?
+            },
+            Settings::Auth(settings) => AuthData{
+                authToken: settings.auth_token.clone(),
+                userId: settings.user_id.clone(),
+            },
+        };
 
         let response = self.request(
             self.build_endpoint(self.endpoint()),

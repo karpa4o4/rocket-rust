@@ -10,15 +10,27 @@
 #### Initialize the client with a username and password.
 
 ```rust,no_run
-use rocketchat::{RocketChatAPI, Settings};
+use rocketchat::{LoginSettings, RocketChatAPI, Settings};
 
-let client = RocketChatAPI::new(
-    Settings {
-        username: String::from("chuck_norris"),
-        password: String::from("supersecret"),
-        domain: String::from("https://mydomain.com"),
-    },
-);
+let settings = Settings::Login(LoginSettings {
+    username: String::from("chuck_norris"),
+    password: String::from("supersecret"),
+    domain: String::from("https://mydomain.com"),
+});
+let client = RocketChatAPI::new(settings);
+```
+
+#### Initialize the client with an auth token and user ID.
+
+```rust,no_run
+use rocketchat::{AuthSettings, RocketChatAPI, Settings};
+
+let settings = Settings::Login(LoginSettings {
+    auth_token: String::from("some_auth_token"),
+    user_id: String::from("some_user_id"),
+    domain: String::from("https://mydomain.com"),
+});
+let client = RocketChatAPI::new(settings);
 ```
 
 #### Available API methods
