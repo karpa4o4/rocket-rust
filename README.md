@@ -7,7 +7,7 @@
 
 ## Example
 
-#### Initialize the client with a username and password.
+### Initialize the client with a username and password.
 
 ```rust,no_run
 use rocketchat::{LoginSettings, RocketChatAPI, Settings};
@@ -20,7 +20,7 @@ let settings = Settings::Login(LoginSettings {
 let client = RocketChatAPI::new(settings);
 ```
 
-#### Initialize the client with an auth token and user ID.
+### Initialize the client with an auth token and user ID.
 
 ```rust,no_run
 use rocketchat::{AuthSettings, RocketChatAPI, Settings};
@@ -33,9 +33,9 @@ let settings = Settings::Auth(AuthSettings {
 let client = RocketChatAPI::new(settings);
 ```
 
-#### Available API methods
+## Available API methods
 
-##### [Post Message](https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/chat-endpoints/postmessage)
+### [Post Message](https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/chat-endpoints/postmessage)
 
 ```rust,no_run
 let result = client.send_message("Some message with star emoji :star:", "#channel");
