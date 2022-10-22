@@ -25,7 +25,7 @@ let client = RocketChatAPI::new(settings);
 ```rust,no_run
 use rocketchat::{AuthSettings, RocketChatAPI, Settings};
 
-let settings = Settings::Login(LoginSettings {
+let settings = Settings::Auth(AuthSettings {
     auth_token: String::from("some_auth_token"),
     user_id: String::from("some_user_id"),
     domain: String::from("https://mydomain.com"),
