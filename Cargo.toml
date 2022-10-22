@@ -2,7 +2,7 @@
 name = "rocketchat"
 version = "0.3.0"
 edition = "2021"
-authors = ["Gavrilyuk Denis"]
+authors = ["Gavrilyuk Denis <karpa4o4@gmail.com>"]
 description = "Rocket.Chat API Implemented in Rust"
 repository = "https://github.com/karpa4o4/rocketchat"
 homepage = "https://github.com/karpa4o4/rocketchat"
