@@ -36,7 +36,7 @@ impl RocketChatAPI {
         }
     }
 
-    pub fn send_message(self, text: &str, room_id: &str) -> Result<String, Error> {
+    pub fn send_message(&self, text: &str, room_id: &str) -> Result<String, Error> {
         let method = PostMessageMethod::new(
             &self.settings,
             String::from(text),
