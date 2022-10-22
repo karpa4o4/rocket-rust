@@ -1,5 +1,5 @@
 use crate::api::methods::PostMessageMethod;
-use crate::api::methods::{APIMethod, Payload};
+use crate::api::methods::{APIMethod};
 use crate::errors::Error;
 
 mod methods;

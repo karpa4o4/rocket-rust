@@ -1,18 +1,18 @@
 use std::collections::HashMap;
 
-use reqwest::blocking::{Client, Response};
 use reqwest::{Method};
+use reqwest::blocking::{Client, Response};
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
-use reqwest::redirect::Policy;
 use serde::{Deserialize};
 
 use crate::api::Settings;
 use crate::errors::Error;
 
 #[derive(Deserialize, Debug)]
-struct AuthData {
-    pub userId: String,
-    pub authToken: String,
+#[serde(rename_all = "camelCase")]
+pub struct AuthData {
+    pub user_id: String,
+    pub auth_token: String,
 }
 
 #[derive(Deserialize, Debug)]
@@ -49,17 +49,17 @@ pub trait APIMethod {
             let auth_token_hdr: &'static str = "x-auth-token";
             headers.insert(
                 HeaderName::from_static(auth_token_hdr),
-                HeaderValue::from_str(data.authToken.clone().as_str()).unwrap(),
+                HeaderValue::from_str(data.auth_token.clone().as_str()).unwrap(),
             );
 
             let user_id_hdr: &'static str = "x-user-id";
             headers.insert(
                 HeaderName::from_static(user_id_hdr),
-                HeaderValue::from_str(data.userId.clone().as_str()).unwrap(),
+                HeaderValue::from_str(data.user_id.clone().as_str()).unwrap(),
             );
         }
 
-        let mut request = Client::default()
+        let request = Client::default()
             .request(method, endpoint)
             .headers(headers)
             .json(&json_map);
@@ -111,8 +111,8 @@ pub trait APIMethod {
                 self.login(&settings.username, &settings.password)?
             },
             Settings::Auth(settings) => AuthData{
-                authToken: settings.auth_token.clone(),
-                userId: settings.user_id.clone(),
+                auth_token: settings.auth_token.clone(),
+                user_id: settings.user_id.clone(),
             },
         };
 
