@@ -1,16 +1,17 @@
 [package]
 name = "rocketchat"
-version = "0.3.1"
+version = "0.4.0"
 edition = "2021"
 authors = ["Gavrilyuk Denis <karpa4o4@gmail.com>"]
 description = "Rocket.Chat API Implemented in Rust"
 repository = "https://github.com/karpa4o4/rocketchat"
 homepage = "https://github.com/karpa4o4/rocketchat"
 readme = "README.md"
-license = "MIT/Apache-2.0"
+license = "MIT"
 documentation = "https://docs.rs/rocketchat/latest/rocketchat"
 keywords = ["rocketchat"]
 
 [dependencies]
-reqwest = { version = "0.11.12", features = ["blocking", "json"] }
+async-trait = "0.1.58"
+reqwest = { version = "0.11.12", features = ["json"] }
 serde = { version = "1.0.145", features = ["derive"] }

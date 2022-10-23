@@ -1,9 +1,9 @@
-pub use crate::api::{
+pub use crate::api::settings::{
     AuthSettings,
     LoginSettings,
-    RocketChatAPI,
     Settings,
 };
+pub use crate::api::methods;
 
 mod api;
 mod errors;

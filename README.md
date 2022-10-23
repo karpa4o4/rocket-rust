@@ -3,54 +3,56 @@
 ### Rust API wrapper for the [RocketChat API](https://docs.rocket.chat/development-docs)
 
 [![crates.io](https://img.shields.io/crates/v/rocketchat.svg)](https://crates.io/crates/rocketchat)
-[![MIT/Apache-2 licensed](https://img.shields.io/crates/l/reqwest.svg)](./LICENSE-APACHE)
+[![MIT](https://img.shields.io/crates/l/rocketchat.svg)](./LICENSE)
 
 ## Example
 
-### Initialize the client with a username and password.
+The library uses asynchronous HTTP client [reqwest](https://crates.io/crates/reqwest), so your Cargo.toml could look like this:
+
+```toml
+rocketchat = "0.4.0"
+tokio = { version = "1", features = ["full"] }
+```
+
+### When calling methods, you need to pass settings that can be created as follows:
+
+#### Using username and password
 
 ```rust,no_run
-use rocketchat::{LoginSettings, RocketChatAPI, Settings};
+use rocketchat::{LoginSettings, Settings};
 
 let settings = Settings::Login(LoginSettings {
-    username: String::from("chuck_norris"),
-    password: String::from("supersecret"),
-    domain: String::from("https://mydomain.com"),
+    username: "chuck_norris".to_string(),
+    password: "supersecret".to_string(),
+    domain: "https://mydomain.com".to_string(),
 });
-let client = RocketChatAPI::new(settings);
 ```
 
-### Initialize the client with an auth token and user ID.
+#### Using auth token and user ID
 
 ```rust,no_run
-use rocketchat::{AuthSettings, RocketChatAPI, Settings};
+use rocketchat::{AuthSettings, Settings};
 
 let settings = Settings::Auth(AuthSettings {
-    auth_token: String::from("some_auth_token"),
-    user_id: String::from("some_user_id"),
-    domain: String::from("https://mydomain.com"),
+    auth_token: "some_auth_token".to_string(),
+    user_id: "some_user_id".to_string(),
+    domain: "https://mydomain.com".to_string(),
 });
-let client = RocketChatAPI::new(settings);
 ```
 
-## Available API methods
+### Available API methods
 
-### [Post Message](https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/chat-endpoints/postmessage)
+#### [Post Message](https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/chat-endpoints/postmessage)
 
 ```rust,no_run
-let result = client.send_message("Some message with star emoji :star:", "#channel");
+let result = PostMessageMethod {
+    settings: &settings,
+    room_id: "#channel".to_string(),
+    text: Some("Some message with star emoji :star:".to_string()),
+    ..Default::default()
+}.call().await;
 ```
-
 
 ## License
 
-Licensed under either of
-
-- Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or http://apache.org/licenses/LICENSE-2.0)
-- MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
-
-### Contribution
-
-Unless you explicitly state otherwise, any contribution intentionally submitted
-for inclusion in the work by you, as defined in the Apache-2.0 license, shall
-be dual licensed as above, without any additional terms or conditions.
+MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
