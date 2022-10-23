@@ -1,58 +1,60 @@
 use std::collections::HashMap;
 
-use reqwest::{Method};
-use reqwest::blocking::{Client, Response};
+use async_trait::async_trait;
+use reqwest::{Client, Method, Response};
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
-use serde::{Deserialize};
+use serde::Deserialize;
 
-use crate::api::Settings;
+use crate::api::settings::Settings;
 use crate::errors::Error;
 
-#[derive(Deserialize, Debug)]
+#[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct AuthData {
+struct AuthData {
     pub user_id: String,
     pub auth_token: String,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Debug, Deserialize)]
 struct LoginResult {
     pub data: AuthData,
 }
 
+#[async_trait]
 pub trait APIMethod {
     fn settings(&self) -> &Settings;
     fn endpoint(&self) -> &str;
     fn method(&self) -> Method;
-    fn json_payload(&self) -> HashMap<&str, &str>;
+    fn json_payload(&self) -> HashMap<String, &str>;
 
-    fn domain(&self) -> &String {
+    fn domain(&self) -> Result<&str, Error> {
         match self.settings() {
-            Settings::Auth(settings) => &settings.domain,
-            Settings::Login(settings) => &settings.domain,
+            Settings::None => Err(Error::MissingSettings),
+            Settings::Auth(settings) => Ok(&settings.domain),
+            Settings::Login(settings) => Ok(&settings.domain),
         }
     }
 
-    fn build_endpoint(&self, uri: &str) -> String {
-        format!("{}{}", self.domain(), uri)
+    fn build_endpoint(&self, uri: &str) -> Result<String, Error> {
+        Ok(format!("{}{}", self.domain()?, uri))
     }
 
-    fn request(
+    async fn request(
         &self,
         endpoint: String,
         method: Method,
-        json_map: &HashMap<&str, &str>,
+        json_map: &HashMap<String, &str>,
         auth_data: Option<AuthData>,
     ) -> Result<Response, Error> {
         let mut headers = HeaderMap::new();
         if let Some(data) = &auth_data {
-            let auth_token_hdr: &'static str = "x-auth-token";
+            let auth_token_hdr: &str = "x-auth-token";
             headers.insert(
                 HeaderName::from_static(auth_token_hdr),
                 HeaderValue::from_str(data.auth_token.clone().as_str()).unwrap(),
             );
 
-            let user_id_hdr: &'static str = "x-user-id";
+            let user_id_hdr: &str = "x-user-id";
             headers.insert(
                 HeaderName::from_static(user_id_hdr),
                 HeaderValue::from_str(data.user_id.clone().as_str()).unwrap(),
@@ -64,77 +66,76 @@ pub trait APIMethod {
             .headers(headers)
             .json(&json_map);
 
-        match request.send() {
+        match request.send().await {
             Ok(response) => Ok(response),
             Err(err) => {
-                let msg = format!("{}", err);
+                let msg = err.to_string();
                 Err(Error::RequestFailed(msg))
             }
         }
     }
 
-    fn login_payload<'a>(&'a self, username: &'a String, password: &'a String) -> HashMap<&str, &str> {
+    fn login_payload<'a>(&'a self, username: &'a str, password: &'a str) -> HashMap<String, &str> {
         let mut payload = HashMap::new();
-        payload.insert("user", username.as_str());
-        payload.insert("password", password.as_str());
+        payload.insert("user".to_string(), username);
+        payload.insert("password".to_string(), password);
 
         payload
     }
 
-    fn login(&self, username: &String, password: &String) -> Result<AuthData, Error> {
+    async fn login(&self, username: &str, password: &str) -> Result<AuthData, Error> {
         let response = self.request(
-            self.build_endpoint("/api/v1/login"),
+            self.build_endpoint("/api/v1/login")?,
             Method::POST,
             &self.login_payload(username, password),
             None
-        )?;
+        ).await?;
 
         if let Err(err) = response.error_for_status_ref() {
-            let msg = format!("{}", err);
+            let msg = err.to_string();
             return Err(Error::RequestFailed(msg));
         }
 
-        let result: Result<LoginResult, _> = response.json();
+        let result: Result<LoginResult, _> = response.json().await;
         match result {
             Ok(login_result) => Ok(login_result.data),
             Err(err) => {
-                let msg = format!("{}", err);
+                let msg = err.to_string();
                 Err(Error::JsonDecodeError(msg))
             }
         }
     }
 
-    fn call(&self) -> Result<String, Error>{
-        let auth_data= match self.settings() {
+    async fn call(&self) -> Result<String, Error> {
+        let auth_data = match self.settings() {
+            Settings::None => Err(Error::MissingSettings),
             Settings::Login(settings) => {
                 // TODO: add processing and return LoginError
-                self.login(&settings.username, &settings.password)?
+                Ok(self.login(&settings.username, &settings.password).await?)
             },
-            Settings::Auth(settings) => AuthData{
-                auth_token: settings.auth_token.clone(),
-                user_id: settings.user_id.clone(),
-            },
-        };
+            Settings::Auth(settings) => Ok(
+                AuthData{
+                    auth_token: settings.auth_token.clone(),
+                    user_id: settings.user_id.clone(),
+                }
+            ),
+        }?;
 
         let response = self.request(
-            self.build_endpoint(self.endpoint()),
+            self.build_endpoint(self.endpoint())?,
             self.method(),
             &self.json_payload(),
             Some(auth_data)
-        )?;
+        ).await?;
 
         if let Err(err) = response.error_for_status_ref() {
-            let msg = format!("{}", err);
+            let msg = err.to_string();
             return Err(Error::RequestFailed(msg));
         }
 
-        match response.text() {
+        match response.text().await {
             Ok(text) => Ok(text),
             Err(_) => Err(Error::ResponseTextError),
         }
     }
-}
-
-pub trait Payload {
-    fn json(&self) -> HashMap<&str, &str>;
 }

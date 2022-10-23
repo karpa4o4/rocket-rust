@@ -1,44 +1,38 @@
 use std::collections::HashMap;
 
-use serde::{Serialize, Deserialize};
+use async_trait::async_trait;
+use reqwest::Method;
 
-use crate::api::methods::base::{APIMethod, Payload};
-use crate::api::Settings;
+use crate::api::methods::APIMethod;
+use crate::api::settings::Settings;
 
 #[derive(Debug)]
 pub struct PostMessageMethod<'a> {
-    settings: &'a Settings,
-    payload: PostMessagePayload,
-}
+    pub settings: &'a Settings,
 
-#[derive(Serialize, Deserialize, Debug)]
-struct PostMessagePayload {
-    pub text: String,
     pub room_id: String,
+    pub text: Option<String>,
+    pub alias: Option<String>,
+    pub emoji: Option<String>,
+    pub avatar: Option<String>,
 }
 
-impl Payload for PostMessagePayload {
-    fn json(&self) -> HashMap<&str, &str> {
-        let mut payload = HashMap::new();
-        payload.insert("text" , self.text.as_str());
-        payload.insert("roomId" , self.room_id.as_str());
+impl Default for PostMessageMethod<'_> {
+    fn default() -> Self {
+        static SETTINGS: Settings = Settings::None;
 
-        payload
-    }
-}
-
-impl PostMessageMethod<'_> {
-    pub fn new(settings: &Settings, text: String, room_id: String) -> PostMessageMethod {
         PostMessageMethod {
-            settings,
-            payload: PostMessagePayload {
-                text,
-                room_id,
-            },
+            settings: &SETTINGS,
+            room_id: "".to_string(),
+            text: None,
+            alias: None,
+            emoji: None,
+            avatar: None,
         }
     }
 }
 
+#[async_trait]
 impl APIMethod for PostMessageMethod<'_> {
     fn settings(&self) -> &Settings {
         self.settings
@@ -48,11 +42,27 @@ impl APIMethod for PostMessageMethod<'_> {
         "/api/v1/chat.postMessage"
     }
 
-    fn method(&self) -> reqwest::Method {
-        reqwest::Method::POST
+    fn method(&self) -> Method {
+        Method::POST
     }
 
-    fn json_payload(&self) -> HashMap<&str, &str> {
-        self.payload.json()
+    fn json_payload(&self) -> HashMap<String, &str> {
+        let mut payload: HashMap<String, &str> = HashMap::new();
+        payload.insert("roomId".to_string() , &self.room_id);
+
+        if let Some(text) = &self.text {
+            payload.insert("text".to_string() , &text);
+        }
+        if let Some(alias) = &self.alias {
+            payload.insert("alias".to_string() , &alias);
+        }
+        if let Some(emoji) = &self.emoji {
+            payload.insert("emoji".to_string() , &emoji);
+        }
+        if let Some(avatar) = &self.avatar {
+            payload.insert("avatar".to_string() , &avatar);
+        }
+
+        payload
     }
 }
