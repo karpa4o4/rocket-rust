@@ -45,6 +45,8 @@ let settings = Settings::Auth(AuthSettings {
 #### [Post Message](https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/chat-endpoints/postmessage)
 
 ```rust,no_run
+use rocketchat::methods::PostMessageMethod;
+
 let result = PostMessageMethod {
     settings: &settings,
     room_id: "#channel".to_string(),
