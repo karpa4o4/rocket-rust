@@ -55,6 +55,19 @@ let result = PostMessageMethod {
 }.call().await;
 ```
 
+#### [Channel Create](https://developer.rocket.chat/reference/api/rest-api/endpoints/core-endpoints/channels-endpoints/create)
+
+```rust,no_run
+use rocketchat::methods::ChannelCreateMethod;
+
+let result = ChannelCreateMethod {
+    settings: &settings,
+    name: "some-channel".to_string(),
+    members: Some(vec!["rocket.cat".to_string()]),
+    ..Default::default()
+}.call().await;
+```
+
 ## License
 
 MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
