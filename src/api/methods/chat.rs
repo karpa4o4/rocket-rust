@@ -4,6 +4,7 @@ use async_trait::async_trait;
 use reqwest::Method;
 
 use crate::api::methods::APIMethod;
+use crate::api::methods::base::PayloadValue;
 use crate::api::settings::Settings;
 
 #[derive(Debug)]
@@ -46,21 +47,21 @@ impl APIMethod for PostMessageMethod<'_> {
         Method::POST
     }
 
-    fn json_payload(&self) -> HashMap<String, &str> {
-        let mut payload: HashMap<String, &str> = HashMap::new();
-        payload.insert("roomId".to_string() , &self.room_id);
+    fn json_payload(&self) -> HashMap<String, PayloadValue> {
+        let mut payload: HashMap<String, PayloadValue> = HashMap::new();
+        payload.insert("roomId".to_string() , PayloadValue::String(&self.room_id));
 
         if let Some(text) = &self.text {
-            payload.insert("text".to_string() , &text);
+            payload.insert("text".to_string() , PayloadValue::String(&text));
         }
         if let Some(alias) = &self.alias {
-            payload.insert("alias".to_string() , &alias);
+            payload.insert("alias".to_string() , PayloadValue::String(&alias));
         }
         if let Some(emoji) = &self.emoji {
-            payload.insert("emoji".to_string() , &emoji);
+            payload.insert("emoji".to_string() , PayloadValue::String(&emoji));
         }
         if let Some(avatar) = &self.avatar {
-            payload.insert("avatar".to_string() , &avatar);
+            payload.insert("avatar".to_string() , PayloadValue::String(&avatar));
         }
 
         payload

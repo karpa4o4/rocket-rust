@@ -3,7 +3,8 @@ use std::collections::HashMap;
 use async_trait::async_trait;
 use reqwest::{Client, Method, Response};
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize, Serializer};
+use serde::ser::SerializeSeq;
 
 use crate::api::settings::Settings;
 use crate::errors::Error;
@@ -20,12 +21,37 @@ struct LoginResult {
     pub data: AuthData,
 }
 
+#[derive(Debug)]
+pub enum PayloadValue<'a> {
+    String(&'a str),
+    Bool(&'a bool),
+    ListOfString(Vec<&'a str>),
+}
+
+impl Serialize for PayloadValue<'_> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where S: Serializer
+    {
+        match self {
+            PayloadValue::String(val) => serializer.serialize_str(val),
+            PayloadValue::Bool(val) => serializer.serialize_bool(**val),
+            PayloadValue::ListOfString(val) => {
+                let mut seq = serializer.serialize_seq(Some(val.len()))?;
+                for el in val {
+                    seq.serialize_element(el)?;
+                }
+                seq.end()
+            },
+        }
+    }
+}
+
 #[async_trait]
 pub trait APIMethod {
     fn settings(&self) -> &Settings;
     fn endpoint(&self) -> &str;
     fn method(&self) -> Method;
-    fn json_payload(&self) -> HashMap<String, &str>;
+    fn json_payload(&self) -> HashMap<String, PayloadValue>;
 
     fn domain(&self) -> Result<&str, Error> {
         match self.settings() {
@@ -43,7 +69,7 @@ pub trait APIMethod {
         &self,
         endpoint: String,
         method: Method,
-        json_map: &HashMap<String, &str>,
+        json_map: &HashMap<String, PayloadValue>,
         auth_data: Option<AuthData>,
     ) -> Result<Response, Error> {
         let mut headers = HeaderMap::new();
@@ -75,10 +101,10 @@ pub trait APIMethod {
         }
     }
 
-    fn login_payload<'a>(&'a self, username: &'a str, password: &'a str) -> HashMap<String, &str> {
-        let mut payload = HashMap::new();
-        payload.insert("user".to_string(), username);
-        payload.insert("password".to_string(), password);
+    fn login_payload<'a>(&'a self, username: &'a str, password: &'a str) -> HashMap<String, PayloadValue> {
+        let mut payload: HashMap<String, PayloadValue> = HashMap::new();
+        payload.insert("user".to_string(), PayloadValue::String(username));
+        payload.insert("password".to_string(), PayloadValue::String(password));
 
         payload
     }
