@@ -1,6 +1,6 @@
 [package]
 name = "rocketchat"
-version = "0.4.0"
+version = "0.4.1"
 edition = "2021"
 authors = ["Gavrilyuk Denis <karpa4o4@gmail.com>"]
 description = "Rocket.Chat API Implemented in Rust"
